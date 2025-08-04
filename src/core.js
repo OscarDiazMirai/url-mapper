@@ -1,46 +1,88 @@
 import * as XLSX from 'xlsx';
 
-// Handle file reported from screaming frog
+/* HANDLE FILE REPORTED FROM SCREAMING FROG */
+// export const handleReportFile = (event, callback) => {
+//     // Catch first file
+//     const file = event.target.files[0];
+//     // Reading file with FileReader instance
+//     const reader = new FileReader();
+
+//     // exe when file is loaded
+//     reader.onload = function (e) {
+//         // Converts the binary data in the file to a byte array
+//         const data = new Uint8Array(e.target.result);
+//         // read the contents of the binary file and convert it into an Excel workbook
+//         const workbook = XLSX.read(data, { type: 'array' });
+
+//         // Access first sheet
+//         const sheetName = workbook.SheetNames[0];
+//         const worksheet = workbook.Sheets[sheetName];
+
+//         // Convert to JSON
+//         // Converts the Excel sheet to an array of arrays
+//         // {header:1} indicates that each row is returned as an array, not as a key-value object.
+//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+//         jsonDataFiltered(jsonData);
+//         const cleanUrls = jsonDataFiltered(jsonData);
+
+//         // Export file with filtered data
+//         /* const data2D = jsonDataFiltered(jsonData).map(url => [url]);
+//         const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+
+//         const workBook = XLSX.utils.book_new();
+//         XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+
+//         XLSX.writeFile(workBook, "urls.xlsx"); */
+//     };
+//     // start reading file
+//     reader.readAsArrayBuffer(file);
+// }
+
 export const handleReportFile = (event) => {
-    // Catch first file
-    const file = event.target.files[0];
-    // Reading file with FileReader instance
-    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        // Catch first file
+        const file = event.target.files[0];
+        // Reading file with FileReader instance
+        const reader = new FileReader();
 
-    // exe when file is loaded
-    reader.onload = function (e) {
-        // Converts the binary data in the file to a byte array
-        const data = new Uint8Array(e.target.result);
-        // read the contents of the binary file and convert it into an Excel workbook
-        const workbook = XLSX.read(data, { type: 'array' });
+        // exe when file is loaded
+        reader.onload = function (e) {
+            try {
+                // Converts the binary data in the file to a byte array
+                const data = new Uint8Array(e.target.result);
+                // read the contents of the binary file and convert it into an Excel workbook
+                const workbook = XLSX.read(data, { type: 'array' });
+                // Access first sheet
+                const workSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[workSheetName];
+                // Convert to JSON
+                // Converts the Excel sheet to an array of arrays
+                // {header:1} indicates that each row is returned as an array, not as a key-value object.
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Access first sheet
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+                // Export file with filtered data
+                const cleanUrls = jsonDataFiltered(jsonData);
+                resolve(cleanUrls);
+            } catch (error) {
+                reject(error);
+            }
 
-        // Convert to JSON
-        // Converts the Excel sheet to an array of arrays
-        // {header:1} indicates that each row is returned as an array, not as a key-value object.
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        jsonDataFiltered(jsonData);
+            // Export file with filtered data
+            /* const data2D = jsonDataFiltered(jsonData).map(url => [url]);
+            const workSheet = XLSX.utils.aoa_to_sheet(data2D);
 
-        // Export file with filtered data
-        /* const data2D = jsonDataFiltered(jsonData).map(url => [url]);
-        const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+            const workBook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
 
-        const workBook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+            XLSX.writeFile(workBook, "urls.xlsx"); */
 
-        XLSX.writeFile(workBook, "urls.xlsx"); */
-    };
-    // start reading file
-    reader.readAsArrayBuffer(file);
+        };
+        // start reading file
+        reader.readAsArrayBuffer(file);
+    });
+};
 
-
-
-}
-
-// Filter JSON data from reported file
+/* FILTER JSON DATA FROM REPORTED FILE */
 const jsonDataFiltered = (jsonData) => {
     // Regex to check if has number, .filetype...
     const regex = /\d|\?|(\.[a-z]{2,5})$/i;
@@ -56,3 +98,6 @@ const jsonDataFiltered = (jsonData) => {
     // console.log(cleanUrls);
     return cleanUrls;
 };
+
+/* HANDLE FILE REPORTED FROM SCREAMING FROG */
+// export const handleAuditFile = ()=>{};
