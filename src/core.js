@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import {jsonDataFilteredFromScreamingFrog, urlsFromJsonDataFiltered} from './utils'
+import { jsonDataFilteredFromScreamingFrog, jsonDataFilteredFromAudit, urlsFromJsonDataFiltered } from './utils'
 
 /* HANDLE FILE REPORTED FROM SCREAMING FROG */
 export const handleReportFile = (event) => {
@@ -24,23 +24,24 @@ export const handleReportFile = (event) => {
                 // {header:1} indicates that each row is returned as an array, not as a key-value object.
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 // console.warn(jsonData)
-
                 // Filtered data
                 const cleanUrls = jsonDataFilteredFromScreamingFrog(jsonData);
                 resolve(cleanUrls);
+
+                // Download file with filtered data
+                const data2D = jsonDataFilteredFromScreamingFrog(jsonData).map(url => [url]);
+                //Convert array of Arrays into a worksheet that can be added to an Excel workbook
+                const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+                // Create a new empty Excel workbook
+                const workBook = XLSX.utils.book_new();
+                // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
+                XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+                // Save the Excel workbook as a file named "..."
+                XLSX.writeFile(workBook, "urls-from-sf.xlsx");
+
             } catch (error) {
                 reject(error);
             }
-
-            // Download file with filtered data
-            /* const data2D = jsonDataFiltered(jsonData).map(url => [url]);
-            const workSheet = XLSX.utils.aoa_to_sheet(data2D);
-
-            const workBook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
-
-            XLSX.writeFile(workBook, "urls.xlsx"); */
-
         };
         // start reading file
         reader.readAsArrayBuffer(file);
@@ -71,21 +72,25 @@ export const handleAuditFile = (event) => {
                 // {header:1} indicates that each row is returned as an array, not as a key-value object.
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                // Filtered data               
-                const cleanUrls = urlsFromJsonDataFiltered(jsonData);
-                resolve(cleanUrls);
+                // Filtered data by url & parent             
+                const filteredFile = jsonDataFilteredFromAudit(jsonData);
+                // Urls builded by filteredFile
+                const cleanUrlsArray = urlsFromJsonDataFiltered(filteredFile);
+                resolve(cleanUrlsArray);
+
+                // Download file with filtered data
+                const data2D = cleanUrlsArray.map(url => [url]);
+                //Convert array of Arrays into a worksheet that can be added to an Excel workbook
+                const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+                // Create a new empty Excel workbook    
+                const workBook = XLSX.utils.book_new();
+                // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
+                XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+                // Save the Excel workbook as a file named "..."    
+                XLSX.writeFile(workBook, "urls-from-audit.xlsx");
             } catch (error) {
                 reject(error);
             }
-
-            // Download file with filtered data
-            /* const data2D = jsonDataFiltered(jsonData).map(url => [url]);
-            const workSheet = XLSX.utils.aoa_to_sheet(data2D);
-
-            const workBook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
-
-            XLSX.writeFile(workBook, "urls.xlsx"); */
 
         };
         // start reading file

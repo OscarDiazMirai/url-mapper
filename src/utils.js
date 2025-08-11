@@ -27,27 +27,41 @@ export const jsonDataFilteredFromAudit = (jsonDataFile) => {
     // TODO=>new [languages]
     // TODO=> regex by url each language
     // TODO=> filter by 'parent'
-    
+
     // Filter is has 'url' & parent properties
-    const filterByUrlAndParent = jsonDataFile.map(obj=>{
+    const filterByUrlAndParent = jsonDataFile.map(obj => {
+        // New filtered objt
         const newObjt = {};
-        // Has url property
-        for(const key in obj){
-            if(key.includes("url") || key === "parent"){
+        for (const key in obj) {
+            // Has url property
+            if (key.includes("url") || key === "parent") {
                 newObjt[key] = obj[key];
-                console.warn(newObjt[key])                
             }
         }
-        return newObjt;   
+        return newObjt;
     })
-    // const x =  filterByUrlAndParent.filter(obj=>Object.keys(obj).includes("parent"))
-    // console.warn(x)
     return filterByUrlAndParent;
 
 };
 
 /* BUILD URLS FROM AUDIT FILE FILTERED BY URL & PARENT */
-    export const urlsFromJsonDataFiltered = (jsonDataArrayFiltered)=>{
-        const urls = jsonDataArrayFiltered.map(obj=>obj);
-        return urls;
-    };
+export const urlsFromJsonDataFiltered = (jsonDataArrayFiltered) => {
+    const urls = jsonDataArrayFiltered.flatMap((obj => {
+        // New array to save object values
+        const values = [];
+        for (const key in obj) {
+            if (key !== "parent") {
+                if (obj.parent) {
+                    // Created slug if has parent
+                    values.push(`${obj.parent}/${obj[key]}`);
+                } else {
+                    // Slug without parent
+                    values.push(obj[key]);
+                }
+            }
+        }
+        return values;
+
+    }))
+    return urls.sort();
+};
