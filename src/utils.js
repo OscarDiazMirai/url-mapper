@@ -1,11 +1,8 @@
 /* FILTER JSON DATA FROM SCREAMING FROG REPORTED FILE */
 export const jsonDataFilteredFromScreamingFrog = (jsonDataFile) => {
     // Regex to check if has number, .filetype...
-    // const regex = /\d|\?|(\.[a-z]{2,5})$/i;
-    // const fileExtensionRegex = /\.[a-z]{2,5}$/i;
-    const fileExtensionRegex = /\.(?!html$)[a-z]{2,5}$/i;
-
-
+    const fileExtensionRegex = /\.(?!(html|php)$)[a-z]{2,5}$/i;
+    // const fileExtensionRegex = /\.(?!html$)[a-z]{2,5}$/i;
 
     // Filter valid urls
     const validRowsURls = jsonDataFile.filter(row => row.includes(200) && row.includes("Indexable"));
@@ -17,7 +14,7 @@ export const jsonDataFilteredFromScreamingFrog = (jsonDataFile) => {
         .filter(url => !fileExtensionRegex.test(url) &&
             !url.includes("?") &&
             !url.includes("=")
-        );
+        ).map(extractUrlDomain)
     return cleanUrls.sort();
 };
 
@@ -46,6 +43,7 @@ export const jsonDataFilteredFromAudit = (jsonDataFile) => {
 
 /* BUILD URLS FROM AUDIT FILE FILTERED BY URL & PARENT */
 export const urlsFromJsonDataFiltered = (jsonDataArrayFiltered) => {
+    // console.log(jsonDataArrayFiltered)
     const urls = jsonDataArrayFiltered.flatMap((obj => {
         // New array to save object values
         const values = [];
@@ -53,10 +51,10 @@ export const urlsFromJsonDataFiltered = (jsonDataArrayFiltered) => {
             if (key !== "parent") {
                 if (obj.parent) {
                     // Created slug if has parent
-                    values.push(`${obj.parent}/${obj[key]}`);
+                    values.push(`/${key.split('.')[1]}/${obj.parent}/${obj[key]}`);
                 } else {
                     // Slug without parent
-                    values.push(obj[key]);
+                    values.push(`/${key.split('.')[1]}/${obj[key]}`);
                 }
             }
         }
@@ -65,3 +63,13 @@ export const urlsFromJsonDataFiltered = (jsonDataArrayFiltered) => {
     }))
     return urls.sort();
 };
+
+/* Extract url base */
+const extractUrlDomain = (url) => {
+  const regex = /^(https?:\/\/)?[^\/]+/i;
+  const match = url.match(regex);
+  if(!match) return null;
+  const domain = match[0];
+  const rest = url.slice(domain.length);
+  return rest;
+}

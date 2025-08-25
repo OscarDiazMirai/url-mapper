@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import { jsonDataFilteredFromScreamingFrog, jsonDataFilteredFromAudit, urlsFromJsonDataFiltered } from './utils'
 
 /* HANDLE FILE REPORTED FROM SCREAMING FROG */
-export const handleReportFile = (event) => {
+export const handleScreamingFrogFile = (event) => {
     return new Promise((resolve, reject) => {
         // Catch first file
         const file = event.target.files[0];
@@ -29,15 +29,15 @@ export const handleReportFile = (event) => {
                 resolve(cleanUrls);
 
                 // Download file with filtered data
-                const data2D = jsonDataFilteredFromScreamingFrog(jsonData).map(url => [url]);
-                //Convert array of Arrays into a worksheet that can be added to an Excel workbook
-                const workSheet = XLSX.utils.aoa_to_sheet(data2D);
-                // Create a new empty Excel workbook
-                const workBook = XLSX.utils.book_new();
-                // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
-                XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
-                // Save the Excel workbook as a file named "..."
-                XLSX.writeFile(workBook, "urls-from-sf.xlsx");
+                // const data2D = jsonDataFilteredFromScreamingFrog(jsonData).map(url => [url]);
+                // //Convert array of Arrays into a worksheet that can be added to an Excel workbook
+                // const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+                // // Create a new empty Excel workbook
+                // const workBook = XLSX.utils.book_new();
+                // // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
+                // XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+                // // Save the Excel workbook as a file named "..."
+                // XLSX.writeFile(workBook, "urls-from-sf.xlsx");
 
             } catch (error) {
                 reject(error);
@@ -79,15 +79,15 @@ export const handleAuditFile = (event) => {
                 resolve(cleanUrlsArray);
 
                 // Download file with filtered data
-                const data2D = cleanUrlsArray.map(url => [url]);
-                //Convert array of Arrays into a worksheet that can be added to an Excel workbook
-                const workSheet = XLSX.utils.aoa_to_sheet(data2D);
-                // Create a new empty Excel workbook    
-                const workBook = XLSX.utils.book_new();
-                // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
-                XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
-                // Save the Excel workbook as a file named "..."    
-                XLSX.writeFile(workBook, "urls-from-audit.xlsx");
+                // const data2D = cleanUrlsArray.map(url => [url]);
+                // //Convert array of Arrays into a worksheet that can be added to an Excel workbook
+                // const workSheet = XLSX.utils.aoa_to_sheet(data2D);
+                // // Create a new empty Excel workbook    
+                // const workBook = XLSX.utils.book_new();
+                // // Add the sheet (worksheet) to the workbook with the name ‘URLs’.
+                // XLSX.utils.book_append_sheet(workBook, workSheet, "URLs");
+                // // Save the Excel workbook as a file named "..."    
+                // XLSX.writeFile(workBook, "urls-from-audit.xlsx");
             } catch (error) {
                 reject(error);
             }
@@ -96,4 +96,16 @@ export const handleAuditFile = (event) => {
         // start reading file
         reader.readAsArrayBuffer(file);
     });
+};
+
+// HANDLE COMPARE BOTH FILES
+export const handleMatchesInBothFiles = (sfFile, auditFile) => {
+    console.table(sfFile);
+    console.table(auditFile);
+    const matches = sfFile.filter(item=>auditFile.includes(item));
+    const unMatches = sfFile.filter(item=>!auditFile.includes(item));
+    console.warn(matches)
+    console.warn(unMatches)
+    return matches;
+    
 };
